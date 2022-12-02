@@ -4,9 +4,7 @@
  * a third mesh.
  */
 
-extern "C" {
-#include "vmath.h"
-}
+#include "lrmb.h"
 #include "booleans.h"
 
 extern "C" int
