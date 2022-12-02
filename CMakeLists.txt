@@ -20,6 +20,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     arrangements/code/
 )
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(cinolib_DIR ${PROJECT_SOURCE_DIR}/arrangements/external/Cinolib)
 set(CINOLIB_USES_OPENGL_GLFW_IMGUI ON)
 set(CINOLIB_USES_SHEWCHUK_PREDICATES ON)
@@ -34,7 +35,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/arrangem
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/arrangements/external/oneTBB/)
 
 
-add_library(lrmb lrmb.cpp)
+add_library(lrmb SHARED lrmb.cpp)
 target_include_directories(lrmb PUBLIC
     ./
     code/
