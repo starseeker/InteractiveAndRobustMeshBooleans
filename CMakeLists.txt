@@ -34,6 +34,19 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/arrangem
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/arrangements/external/oneTBB/)
 
 
+add_library(lrmb lrmb.cpp)
+target_include_directories(lrmb PUBLIC
+    ./
+    code/
+    arrangements/code/
+)
+target_link_libraries(lrmb cinolib)
+target_link_libraries(lrmb tbb)
+target_compile_definitions(lrmb PUBLIC TBB_PARALLEL=1)
+target_include_directories(lrmb PUBLIC ${PROJECT_SOURCE_DIR}/arrangements/external/abseil-cpp/)
+target_include_directories(lrmb PUBLIC ${PROJECT_SOURCE_DIR}/arrangements/external/oneTBB/)
+
+
 add_executable(${PROJECT_NAME}_rotation main-rotation.cpp)
 
 target_include_directories(${PROJECT_NAME}_rotation PUBLIC
