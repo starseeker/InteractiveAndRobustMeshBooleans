@@ -38,13 +38,24 @@
 #ifndef IRMB_DEFINES_H
 #define IRMB_DEFINES_H
 
+#if defined(_MSC_VER)
+#  define IRMB_DLLEXPORT __declspec(dllexport)
+#  define IRMB_DLLIMPORT __declspec(dllimport)
+#elif defined(__GNUC__) || defined(__clang__)
+#  define IRMB_DLLEXPORT __attribute__ ((visibility ("default")))
+#  define IRMB_DLLIMPORT __attribute__ ((visibility ("default")))
+#else
+#  define IRMB_DLLEXPORT
+#  define IRMB_DLLIMPORT
+#endif
+
 #ifndef IRMB_EXPORT
 #  if defined(IRMB_DLL_EXPORTS) && defined(IRMB_DLL_IMPORTS)
 #    error "Only IRMB_DLL_EXPORTS or IRMB_DLL_IMPORTS can be defined, not both."
 #  elif defined(IRMB_DLL_EXPORTS)
-#    define IRMB_EXPORT COMPILER_DLLEXPORT
+#    define IRMB_EXPORT IRMB_DLLEXPORT
 #  elif defined(IRMB_DLL_IMPORTS)
-#    define IRMB_EXPORT COMPILER_DLLIMPORT
+#    define IRMB_EXPORT IRMB_DLLIMPORT
 #  else
 #    define IRMB_EXPORT
 #  endif
