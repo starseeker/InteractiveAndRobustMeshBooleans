@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # set the project name
 project(mesh_booleans)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set(TBB_TEST OFF CACHE BOOL " " FORCE)
 set(TBB_EXAMPLES OFF CACHE BOOL " " FORCE)
 add_subdirectory(arrangements/external/oneTBB)
@@ -27,6 +29,12 @@ set(IRMB_INCLUDE_DIRS
   )
 
 set(IRMB_LIBS cinolib tbb)
+
+# Build shared library
+add_library(irmb SHARED code/irmb.cpp)
+target_include_directories(irmb PUBLIC ${IRMB_INCLUDE_DIRS})
+target_link_libraries(irmb ${IRMB_LIBS})
+target_compile_definitions(irmb PUBLIC TBB_PARALLEL=1)
 
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp)
