@@ -38,6 +38,7 @@
 #include <cinolib/meshes/trimesh.h>
 #include <cinolib/find_intersections.h>
 #include "booleans.h"
+#include "irmb.h"
 
 static bool
 mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)

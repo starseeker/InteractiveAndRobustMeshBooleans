@@ -31,7 +31,7 @@ set(IRMB_INCLUDE_DIRS
 set(IRMB_LIBS cinolib tbb)
 
 # Build shared library
-add_library(irmb SHARED code/irmb.cpp)
+add_library(irmb SHARED irmb.cpp)
 target_include_directories(irmb PUBLIC ${IRMB_INCLUDE_DIRS})
 target_link_libraries(irmb ${IRMB_LIBS})
 target_compile_definitions(irmb PUBLIC TBB_PARALLEL=1)
