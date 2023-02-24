@@ -46,8 +46,14 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
     if (!coords || !clen || !tris || !tricnt)
 	return false;
 
-    std::vector<double> cvec((*coords), (*coords)+clen);
-    std::vector<unsigned int> tvec((*tris), (*tris)+(tricnt*3));
+    std::vector<double> cvec;
+    for (int i = 0; i < clen; i++) {
+	cvec.push_back(coords[i]);
+    }
+    std::vector<unsigned int> tvec;
+    for (int i = 0; i < tricnt*3; i++) {
+	tvec.push_back(tris[i]);
+    }
 
     cinolib::Trimesh<> m(cvec, tvec);
 
