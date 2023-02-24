@@ -105,7 +105,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 
     if(highest_edge == -1)
     {
-	std::cout << "this should not be happening" << std::endl;
+	std::cout << "highest_edge == -1: this should not be happening" << std::endl;
 	return false;
     }
 
@@ -138,7 +138,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 
     if(seed_t == -1)
     {
-	std::cout << "this should not be happening" << std::endl;
+	std::cout << "seed_t == -1: this should not be happening" << std::endl;
 	return false;
     }
 
@@ -148,7 +148,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 
     if(orient == 0)
     {
-	std::cout << "this should not be happening" << std::endl;
+	std::cout << "orient == 0: this should not be happening" << std::endl;
 	return false;
     }
 
