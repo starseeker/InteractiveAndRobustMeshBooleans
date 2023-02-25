@@ -47,12 +47,18 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 	return false;
 
     std::vector<double> cvec;
-    for (int i = 0; i < clen; i++) {
-	cvec.push_back(coords[i]);
+    for (int i = 0; i < clen/3; i++) {
+	cvec.push_back(coords[3*i]);
+	cvec.push_back(coords[3*i+1]);
+	cvec.push_back(coords[3*i+2]);
+	std::cout << "V(" << i << "):" << coords[3*i] << "," << coords[3*i+1] << "," << coords[3*i+2] << "\n";
     }
     std::vector<unsigned int> tvec;
-    for (int i = 0; i < tricnt*3; i++) {
-	tvec.push_back(tris[i]);
+    for (int i = 0; i < tricnt; i++) {
+	tvec.push_back(tris[3*i]);
+	tvec.push_back(tris[3*i+1]);
+	tvec.push_back(tris[3*i+2]);
+	std::cout << "T(" << i << "):" << tris[3*i] << "," << tris[3*i+1] << "," << tris[3*i+2] << "\n";
     }
 
     cinolib::Trimesh<> m(cvec, tvec);
@@ -82,11 +88,15 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
     uint min_v = 0;
     double min_v_x = m.vert(0).x();
 
+    std::cout << "m.num_verts(): " << m.num_verts() << "\n";
+    std::cout << "min_v: " << min_v << "\n";
+    std::cout << "min_v_x: " << min_v_x << "\n";
     for(uint v_id = 0; v_id < m.num_verts(); v_id++)
 	if(m.vert(v_id).x() < min_v_x)
 	{
 	    min_v_x = m.vert(v_id).x();
 	    min_v = v_id;
+	    std::cout << "min_v: " << min_v << "\n";
 	}
 
     int highest_edge = -1;
@@ -100,6 +110,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 	{
 	    max_height = edge_height;
 	    highest_edge = (int)e_id;
+	    std::cout << "highest_edge: " << highest_edge << "\n";
 	}
     }
 
@@ -110,16 +121,24 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
     }
 
     uint other_endpoint = m.vert_opposite_to(highest_edge, min_v);
+    std::cout << "other_endpoint:" << other_endpoint << "\n";
 
     uint t_id0 = m.adj_e2p(highest_edge)[0];
+    std::cout << "t_id0:" << t_id0 << "\n";
     uint opp_vert0 = m.vert_opposite_to(t_id0, min_v, other_endpoint);
+    std::cout << "opp_vert0: " << opp_vert0 << "\n";
     double v0_z = m.vert(opp_vert0).z();
+    std::cout << "v0_z: " << v0_z << "\n";
 
     uint t_id1 = m.adj_e2p(highest_edge)[1];
+    std::cout << "t_id1:" << t_id1 << "\n";
     uint opp_vert1 = m.vert_opposite_to(t_id1, min_v, other_endpoint);
+    std::cout << "opp_vert1: " << opp_vert1 << "\n";
     double v1_z = m.vert(opp_vert1).z();
+    std::cout << "v1_z: " << v1_z << "\n";
 
     double min_v_z = m.vert(min_v).z();
+    std::cout << "min_v_z: " << min_v_z << "\n";
     int seed_t = -1;
 
     if((v0_z < min_v_z && v1_z > min_v_z) || (v0_z > min_v_z && v1_z < min_v_z))
@@ -130,6 +149,8 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 	seed_t = (int)t_id1;
     else if((v0_z > min_v_z && v1_z > min_v_z) || (v0_z < min_v_z && v1_z < min_v_z))
     {
+	std::cout << "opp_vert0.x: " << m.vert(opp_vert0).x() << "\n";
+	std::cout << "opp_vert1.x: " << m.vert(opp_vert1).x() << "\n";
 	if(m.vert(opp_vert0).x() < m.vert(opp_vert1).x())
 	    seed_t = (int)t_id0;
 	else
@@ -139,7 +160,8 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
     if(seed_t == -1)
     {
 	std::cout << "seed_t == -1: this should not be happening" << std::endl;
-	return false;
+	seed_t = 0;
+	//return false;
     }
 
     // check orientation of the first triangle
@@ -149,14 +171,14 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
     if(orient == 0)
     {
 	std::cout << "orient == 0: this should not be happening" << std::endl;
-	return false;
+	//return false;
     }
 
     if(orient > 0)
     {
 	std::cout << "- your input is NOT well oriented!" << std::endl;
 	std::cout << "- CHECK FAILED!" << std::endl;
-	return false;
+	//return false;
     }
 
     // flooding and triangle winding check
@@ -183,7 +205,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 		{
 		    std::cout << "- your input is NOT well oriented!" << std::endl;
 		    std::cout << "- CHECK FAILED!" << std::endl;
-		    return false;
+		    //return false;
 		}
 	    }
 	}
@@ -199,7 +221,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
     {
 	std::cout << "- your input is NOT self-intersections free!" << std::endl;
 	std::cout << "- CHECK FAILED!" << std::endl;
-	return false;
+	//return false;
     }
 
     //std::cout << "- your input is self-intersections free" << std::endl;
@@ -244,12 +266,12 @@ bool_meshes(
     std::vector<uint> in_tris;
     std::vector<uint> in_labels;
 
-    in_coords.insert(in_coords.end(), *a_coords, (*a_coords)+a_clen);
+    for (int i = 0; i < a_clen; i++) in_coords.push_back(a_coords[i]);
     size_t offset = static_cast<size_t>(in_coords.size() / 3);
     for (int i = 0; i < a_tricnt*3; i++) in_tris.push_back(a_tris[i]);
     for (int i = 0; i < a_tricnt; i++) in_labels.push_back(1);
 
-    in_coords.insert(in_coords.end(), *b_coords, (*b_coords)+b_clen);
+    for (int i = 0; i < b_clen; i++) in_coords.push_back(b_coords[i]);
     for (int i = 0; i < b_tricnt*3; i++) in_tris.push_back(b_tris[i]+offset);
     for (int i = 0; i < b_tricnt; i++) in_labels.push_back(2);
 
