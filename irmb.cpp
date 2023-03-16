@@ -63,155 +63,65 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 
     cinolib::Trimesh<> m(cvec, tvec);
 
-    // CHECK if mesh is MANIFOLD and WATERTIGHT
-    for(uint v_id = 0; v_id < m.num_verts(); v_id++)
-    {
-	if(!m.vert_is_manifold(v_id))
-	{
+    // CHECK if mesh is MANIFOLD
+    for(uint vid=0; vid<m.num_verts(); ++vid) {
+	if(!m.vert_is_manifold(vid)) {
 	    std::cout << "- your input is NOT manifold!" << std::endl;
 	    std::cout << "- CHECK FAILED!" << std::endl;
 	    return false;
 	}
-
-	if(m.vert_is_boundary(v_id))
-	{
-	    std::cout << "- your input is NOT watertight!" << std::endl;
-	    std::cout << "- CHECK FAILED!" << std::endl;
-	    return false;
-	}
     }
-
-    //std::cout << "- your input is manifold" << std::endl;
-    //std::cout << "- your input is watertight" << std::endl;
 
     // CHECK triangle ORIENTATION
-    uint min_v = 0;
-    double min_v_x = m.vert(0).x();
-
-    std::cout << "m.num_verts(): " << m.num_verts() << "\n";
-    std::cout << "min_v: " << min_v << "\n";
-    std::cout << "min_v_x: " << min_v_x << "\n";
-    for(uint v_id = 0; v_id < m.num_verts(); v_id++)
-	if(m.vert(v_id).x() < min_v_x)
+    {
+	// Local orientation
+	std::vector<uint> visited(m.num_polys(),false);
+	for(uint pid=0; pid<m.num_polys(); ++pid)
 	{
-	    min_v_x = m.vert(v_id).x();
-	    min_v = v_id;
-	    std::cout << "min_v: " << min_v << "\n";
-	}
-
-    int highest_edge = -1;
-    double max_height = 0.0;
-
-    for(uint e_id : m.adj_v2e(min_v))
-    {
-	double edge_height = std::abs(m.edge_vert(e_id, 0).y() - m.edge_vert(e_id, 1).y());
-
-	if(edge_height > max_height)
-	{
-	    max_height = edge_height;
-	    highest_edge = (int)e_id;
-	    std::cout << "highest_edge: " << highest_edge << "\n";
-	}
-    }
-
-    if(highest_edge == -1)
-    {
-	std::cout << "highest_edge == -1: this should not be happening" << std::endl;
-	return false;
-    }
-
-    uint other_endpoint = m.vert_opposite_to(highest_edge, min_v);
-    std::cout << "other_endpoint:" << other_endpoint << "\n";
-
-    uint t_id0 = m.adj_e2p(highest_edge)[0];
-    std::cout << "t_id0:" << t_id0 << "\n";
-    uint opp_vert0 = m.vert_opposite_to(t_id0, min_v, other_endpoint);
-    std::cout << "opp_vert0: " << opp_vert0 << "\n";
-    double v0_z = m.vert(opp_vert0).z();
-    std::cout << "v0_z: " << v0_z << "\n";
-
-    uint t_id1 = m.adj_e2p(highest_edge)[1];
-    std::cout << "t_id1:" << t_id1 << "\n";
-    uint opp_vert1 = m.vert_opposite_to(t_id1, min_v, other_endpoint);
-    std::cout << "opp_vert1: " << opp_vert1 << "\n";
-    double v1_z = m.vert(opp_vert1).z();
-    std::cout << "v1_z: " << v1_z << "\n";
-
-    double min_v_z = m.vert(min_v).z();
-    std::cout << "min_v_z: " << min_v_z << "\n";
-    int seed_t = -1;
-
-    if((v0_z < min_v_z && v1_z > min_v_z) || (v0_z > min_v_z && v1_z < min_v_z))
-	seed_t = (int)t_id0;
-    else if((v0_z < min_v_z && v1_z == min_v_z) || (v0_z > min_v_z && v1_z == min_v_z))
-	seed_t = (int)t_id0;
-    else if((v0_z == min_v_z && v1_z < min_v_z) || (v0_z == min_v_z && v1_z > min_v_z))
-	seed_t = (int)t_id1;
-    else if((v0_z > min_v_z && v1_z > min_v_z) || (v0_z < min_v_z && v1_z < min_v_z))
-    {
-	std::cout << "opp_vert0.x: " << m.vert(opp_vert0).x() << "\n";
-	std::cout << "opp_vert1.x: " << m.vert(opp_vert1).x() << "\n";
-	if(m.vert(opp_vert0).x() < m.vert(opp_vert1).x())
-	    seed_t = (int)t_id0;
-	else
-	    seed_t = (int)t_id1;
-    }
-
-    if(seed_t == -1)
-    {
-	std::cout << "seed_t == -1: this should not be happening" << std::endl;
-	seed_t = 0;
-	//return false;
-    }
-
-    // check orientation of the first triangle
-    cinolib::vec3d external_v(m.vert(min_v).x() -0.5, m.vert(min_v).y(), m.vert(min_v).z());
-    double orient = cinolib::orient3d(m.poly_vert(seed_t, 0), m.poly_vert(seed_t, 1), m.poly_vert(seed_t, 2), external_v);
-
-    if(orient == 0)
-    {
-	std::cout << "orient == 0: this should not be happening" << std::endl;
-	//return false;
-    }
-
-    if(orient > 0)
-    {
-	std::cout << "- your input is NOT well oriented!" << std::endl;
-	std::cout << "- CHECK FAILED!" << std::endl;
-	//return false;
-    }
-
-    // flooding and triangle winding check
-    std::vector<bool> visited_t(m.num_polys(), false);
-    std::stack<uint> tris_stack;
-    tris_stack.push(seed_t);
-
-    while(!tris_stack.empty())
-    {
-	uint curr_t = tris_stack.top();
-	tris_stack.pop();
-	visited_t[curr_t] = true;
-
-	for(uint adj_t : m.adj_p2p(curr_t))
-	{
-	    if(!visited_t[adj_t])
+	    if(visited[pid]) continue;
+	    std::queue<uint> q;
+	    q.push(pid);
+	    visited[pid] = true;
+	    while(!q.empty())
 	    {
-		uint shared_edge = m.edge_shared(curr_t, adj_t);
-		if(m.edge_is_CCW(shared_edge, curr_t) != m.edge_is_CCW(shared_edge, adj_t))
+		uint pid = q.front();
+		q.pop();
+		for(uint nbr : m.adj_p2p(pid))
 		{
-		    tris_stack.push(adj_t);
-		}
-		else // stop flooding
-		{
-		    std::cout << "- your input is NOT well oriented!" << std::endl;
-		    std::cout << "- CHECK FAILED!" << std::endl;
-		    //return false;
+		    uint eid = m.edge_shared(pid, nbr);
+		    if(m.edge_is_CCW(eid,pid)==m.edge_is_CCW(eid,nbr)) {
+			std::cout << "- your mesh local orientation is NOT correct!" << std::endl;
+			std::cout << "- CHECK FAILED!" << std::endl;
+			return false;
+		    }
+		    if(!visited[nbr])
+		    {
+			visited[nbr] = true;
+			q.push(nbr);
+		    }
 		}
 	    }
 	}
     }
-
-    //std::cout << "- your input is well oriented" << std::endl;
+    {
+	// Global orientaiton
+	// WARNING: this is correct only if the mesh has a single connected component
+	cinolib::vec3d  O   = m.bbox().min - cinolib::vec3d(1,0,0); // surely external
+	double vol = 0;
+	for(uint pid=0; pid<m.num_polys(); ++pid)
+	{
+	    // sum signed volumes
+	    vol += tet_volume(m.poly_vert(pid,0),
+		    m.poly_vert(pid,1),
+		    m.poly_vert(pid,2), O);
+	}
+	// if faces are CCW volume is negative
+	if (vol<0) {
+	    std::cout << "- CCW volume - negative mesh!" << std::endl;
+	    std::cout << "- CHECK FAILED!" << std::endl;
+	    return false;
+	}
+    }
 
     // CHECK self INTERSECTIONS
     std::set<cinolib::ipair> intersections;
@@ -221,12 +131,9 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
     {
 	std::cout << "- your input is NOT self-intersections free!" << std::endl;
 	std::cout << "- CHECK FAILED!" << std::endl;
-	//return false;
+	return false;
     }
 
-    //std::cout << "- your input is self-intersections free" << std::endl;
-
-    //std::cout << "- CHECK PASSED!" << std::endl;
     return true;
 }
 
