@@ -244,7 +244,7 @@ bool_meshes(
     (*o_tris) = (unsigned int *)calloc(bool_tris.size(), sizeof(unsigned int));
     for (size_t i = 0; i < bool_coords.size(); i++) (*o_coords)[i] = bool_coords[i];
     for (size_t i = 0; i < bool_tris.size(); i++) (*o_tris)[i] = bool_tris[i];
-    *o_clen = (int)bool_coords.size();
+    *o_clen = static_cast<int>(bool_coords.size()/3);
     *o_tricnt = static_cast<int>(bool_tris.size()/3);
 
     return static_cast<long>(bool_tris.size()/3);
