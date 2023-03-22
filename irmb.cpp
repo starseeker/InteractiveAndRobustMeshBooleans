@@ -219,11 +219,11 @@ bool_meshes(
     for (int i = 0; i < a_clen; i++) in_coords.push_back(a_coords[i]);
     size_t offset = static_cast<size_t>(in_coords.size() / 3);
     for (int i = 0; i < a_tricnt*3; i++) in_tris.push_back(a_tris[i]);
-    for (int i = 0; i < a_tricnt; i++) in_labels.push_back(1);
+    for (int i = 0; i < a_tricnt; i++) in_labels.push_back(0);
 
     for (int i = 0; i < b_clen; i++) in_coords.push_back(b_coords[i]);
     for (int i = 0; i < b_tricnt*3; i++) in_tris.push_back(b_tris[i]+offset);
-    for (int i = 0; i < b_tricnt; i++) in_labels.push_back(2);
+    for (int i = 0; i < b_tricnt; i++) in_labels.push_back(1);
 
     // Perform the boolean pipeline
     std::vector<double> bool_coords;
