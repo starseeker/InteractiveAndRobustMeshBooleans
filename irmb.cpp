@@ -64,8 +64,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
     // CHECK if mesh is MANIFOLD
     for(uint vid=0; vid<m.num_verts(); ++vid) {
 	if(!m.vert_is_manifold(vid)) {
-	    std::cout << "- your input is NOT manifold!" << std::endl;
-	    std::cout << "- CHECK FAILED!" << std::endl;
+	    std::cout << "- mesh is NOT manifold!" << std::endl;
 	    return false;
 	}
     }
@@ -88,8 +87,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 		{
 		    uint eid = m.edge_shared(pid, nbr);
 		    if(m.edge_is_CCW(eid,pid)==m.edge_is_CCW(eid,nbr)) {
-			std::cout << "- your mesh local orientation is NOT correct!" << std::endl;
-			std::cout << "- CHECK FAILED!" << std::endl;
+			std::cout << "- mesh local orientation is NOT correct!" << std::endl;
 			return false;
 		    }
 		    if(!visited[nbr])
@@ -108,8 +106,7 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 
     if(!intersections.empty())
     {
-	std::cout << "- your input is NOT self-intersections free!" << std::endl;
-	std::cout << "- CHECK FAILED!" << std::endl;
+	std::cout << "- mesh is NOT free of self-intersections!" << std::endl;
 	return false;
     }
 
@@ -125,10 +122,14 @@ bool_meshes(
 	)
 {
     // First step, check the input meshes.  If they don't satisfy the criteria, don't proceed
-    if (!mesh_valid(a_coords, a_clen, a_tris, a_tricnt))
+    if (!mesh_valid(a_coords, a_clen, a_tris, a_tricnt)) {
+	std::cerr << "a: invalid input\n";
 	return -1;
-    if (!mesh_valid(b_coords, b_clen, b_tris, b_tricnt))
+    }
+    if (!mesh_valid(b_coords, b_clen, b_tris, b_tricnt)) {
+	std::cerr << "b: invalid input\n";
 	return -1;
+    }
 
     // Decode boolean operator
     BoolOp op;
@@ -182,6 +183,10 @@ bool_meshes(
     for (size_t i = 0; i < bool_tris.size(); i++) (*o_tris)[i] = bool_tris[i];
     *o_clen = static_cast<int>(bool_coords.size()/3);
     *o_tricnt = static_cast<int>(bool_tris.size()/3);
+
+    if (!mesh_valid(*o_coords, bool_coords.size(), *o_tris, *o_tricnt)) {
+	std::cerr << "WARNING - booleanPipeline output failed validity test!\n";
+    }
 
     return static_cast<long>(bool_tris.size()/3);
 }
