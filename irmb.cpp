@@ -186,6 +186,18 @@ bool_meshes(
 
     if (!mesh_valid(*o_coords, bool_coords.size(), *o_tris, *o_tricnt)) {
 	std::cerr << "WARNING - booleanPipeline output failed validity test!\n";
+	std::vector<double> av_coords;
+	for (int i = 0; i < a_clen; i++) av_coords.push_back(a_coords[i]);
+	std::vector<uint> av_tris;
+	for (int i = 0; i < a_tricnt*3; i++) av_tris.push_back(a_tris[i]);
+	std::vector<double> bv_coords;
+	for (int i = 0; i < b_clen; i++) bv_coords.push_back(b_coords[i]);
+	std::vector<uint> bv_tris;
+	for (int i = 0; i < b_tricnt*3; i++) bv_tris.push_back(b_tris[i]);
+	cinolib::write_OBJ("a.obj", av_coords, av_tris, {});
+	cinolib::write_OBJ("b.obj", bv_coords, bv_tris, {});
+	cinolib::write_OBJ("eval_failure.obj", bool_coords, bool_tris, {});
+	exit(EXIT_FAILURE);
     }
 
     return static_cast<long>(bool_tris.size()/3);
