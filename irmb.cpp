@@ -51,14 +51,12 @@ mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 	cvec.push_back(coords[3*i]);
 	cvec.push_back(coords[3*i+1]);
 	cvec.push_back(coords[3*i+2]);
-	std::cout << "V(" << i << "):" << coords[3*i] << "," << coords[3*i+1] << "," << coords[3*i+2] << "\n";
     }
     std::vector<unsigned int> tvec;
     for (int i = 0; i < tricnt; i++) {
 	tvec.push_back(tris[3*i]);
 	tvec.push_back(tris[3*i+1]);
 	tvec.push_back(tris[3*i+2]);
-	std::cout << "T(" << i << "):" << tris[3*i] << "," << tris[3*i+1] << "," << tris[3*i+2] << "\n";
     }
 
     cinolib::Trimesh<> m(cvec, tvec);
