@@ -41,46 +41,6 @@
 #include "irmb.h"
 
 static bool
-negative_mesh(double *coords, int clen, unsigned int *tris, int tricnt)
-{
-    std::vector<double> cvec;
-    for (int i = 0; i < clen/3; i++) {
-	cvec.push_back(coords[3*i]);
-	cvec.push_back(coords[3*i+1]);
-	cvec.push_back(coords[3*i+2]);
-	std::cout << "V(" << i << "):" << coords[3*i] << "," << coords[3*i+1] << "," << coords[3*i+2] << "\n";
-    }
-    std::vector<unsigned int> tvec;
-    for (int i = 0; i < tricnt; i++) {
-	tvec.push_back(tris[3*i]);
-	tvec.push_back(tris[3*i+1]);
-	tvec.push_back(tris[3*i+2]);
-	std::cout << "T(" << i << "):" << tris[3*i] << "," << tris[3*i+1] << "," << tris[3*i+2] << "\n";
-    }
-
-    cinolib::Trimesh<> m(cvec, tvec);
-
-    // Global orientaiton
-    // WARNING: this is correct only if the mesh has a single connected component
-    cinolib::vec3d  O   = m.bbox().min - cinolib::vec3d(1,0,0); // surely external
-    double vol = 0;
-    for(uint pid=0; pid<m.num_polys(); ++pid)
-    {
-	// sum signed volumes
-	vol += tet_volume(m.poly_vert(pid,0),
-		m.poly_vert(pid,1),
-		m.poly_vert(pid,2), O);
-    }
-    // if faces are CCW volume is negative
-    if (vol<0) {
-	std::cout << "- CCW volume - negative mesh!" << std::endl;
-	return true;
-    }
-
-    return false;
-}
-
-static bool
 mesh_valid(double *coords, int clen, unsigned int *tris, int tricnt)
 {
     if (!coords || !clen || !tris || !tricnt)
@@ -166,28 +126,6 @@ bool_meshes(
 	double *b_coords, int b_clen, unsigned int *b_tris, int b_tricnt
 	)
 {
-    // If the mesh is negative, flip the triangles
-    if (negative_mesh(a_coords, a_clen, a_tris, a_tricnt)) {
-	for (int i = 0; i < a_tricnt; i++) {
-	    int tmp_tri = a_tris[3*i+1];
-	    a_tris[3*i+1] = a_tris[3*i+2];
-	    a_tris[3*i+2] = tmp_tri;
-	}
-    }
-    if (negative_mesh(a_coords, a_clen, a_tris, a_tricnt)) {
-	std::cout << "a flipping failed!\n";
-    }
-    if (negative_mesh(b_coords, b_clen, b_tris, b_tricnt)) {
-	for (int i = 0; i < b_tricnt; i++) {
-	    int tmp_tri = b_tris[3*i+1];
-	    b_tris[3*i+1] = b_tris[3*i+2];
-	    b_tris[3*i+2] = tmp_tri;
-	}
-    }
-    if (negative_mesh(b_coords, b_clen, b_tris, b_tricnt)) {
-	std::cout << "b flipping failed!\n";
-    }
-
     // First step, check the input meshes.  If they don't satisfy the criteria, don't proceed
     if (!mesh_valid(a_coords, a_clen, a_tris, a_tricnt))
 	return -1;
